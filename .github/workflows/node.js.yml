@@ -1,39 +1,40 @@
-name: Auto Deploy to EC2
+name: CI/CD Pipeline
 
 on:
   push:
     branches:
-      - main   # Trigger this workflow on push to the main branch
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Create SSH directory
-        run: mkdir -p ~/.ssh
+    - name: Checkout code
+      uses: actions/checkout@v4
       
-      - name: Set up SSH key
-        run: |
-          # Decode the base64 secret and save it as a .pem file
-          printf "%s" "${{ secrets.EC2_SSH_PRIVATE_KEY }}" | base64 --decode > ~/.ssh/deployment_key.pem
+    - name: Create SSH directory
+      run: mkdir -p ~/.ssh
       
-      - name: Set Permissions on Pem file
-        run:  chmod 400 ~/.ssh/deployment_key.pem
+    - name: Set up SSH key
+      run: |
+        # Decode the base64 secret and save it as a .pem file
+        echo "${{ secrets.PEM_SECRET }}" | base64 --decode > ~/.ssh/deployment_key.pem
       
-      - name: Add SSH host key to known_hosts
-        run: ssh-keyscan -H "${{secrets.EC2_PUBLIC_IP}}" >> ~/.ssh/known_hosts
+    - name: Set Permissions on Pem file
+      run:  chmod 600 ~/.ssh/deployment_key.pem
 
-      - name: Deploy to EC2
-        run: |
-          ssh -i ~/.ssh/deployment_key.pem -o StrictHostKeyChecking=no ubuntu@${{secrets.EC2_PUBLIC_IP}} << 'EOF'
-            cd node-aws-project/
-            git pull origin main 
-            npm install
-            
-            # Restart the server with PM2
-            pm2 restart index 
+    - name: Add SSH host key to known_hosts
+      run: ssh-keyscan -H "${{secrets.SERVER_IP}}" >> ~/.ssh/known_hosts
+   
+    - name: Deploy via SSH
+      run: |
+          ssh -i ~/.ssh/deployment_key.pem -o StrictHostKeyChecking=no ubuntu@"${{secrets.SERVER_IP}}" << 'EOF'
+          PM2_PATH="/home/ubuntu/.nvm/versions/node/v20.17.0/bin/pm2"
+
+          cd node-aws-project/
+          git pull origin main
+          echo "Using PM2 at: $PM2_PATH"
+          npm install
+          $PM2_PATH restart "${{secrets.SERVICE_NAME}}" || $PM2_PATH start app.js --name "${{secrets.SERVICE_NAME}}"
           EOF
-    
