@@ -7,6 +7,6 @@ const { upload } = require("../../utils/multer");
 
 router.post('/register',  upload.single("profile"),  userService.register); 
  
-router.get('/getUser', userService.getMany);
+router.get('/getUsers', userService.getMany);
 
 module.exports = router;
