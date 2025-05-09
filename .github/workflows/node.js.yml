@@ -30,11 +30,10 @@ jobs:
     - name: Deploy via SSH
       run: |
           ssh -i ~/.ssh/deployment_key.pem -o StrictHostKeyChecking=no ubuntu@"${{secrets.SERVER_IP}}" << 'EOF'
-          PM2_PATH="/home/ubuntu/.nvm/versions/node/v20.17.0/bin/pm2"
+          # PM2_PATH="/home/ubuntu/.nvm/versions/node/v20.17.0/bin/pm2"
 
           cd node-aws-project/
           git pull origin main
-          echo "Using PM2 at: $PM2_PATH"
           npm install
-          $PM2_PATH restart "${{secrets.SERVICE_NAME}}" || $PM2_PATH start app.js --name "${{secrets.SERVICE_NAME}}"
+          pm2 restart "${{secrets.SERVICE_NAME}}"
           EOF
