@@ -18,7 +18,7 @@ jobs:
       - name: Set up SSH key
         run: |
           # Decode the base64 secret and save it as a .pem file
-          echo "${{secrets.EC2_SSH_PRIVATE_KEY}}" | base64 --decode > ~/.ssh/deployment_key.pem
+          printf "%s" "${{ secrets.EC2_SSH_PRIVATE_KEY }}" | base64 --decode > ~/.ssh/deployment_key.pem
       
       - name: Set Permissions on Pem file
         run:  chmod 400 ~/.ssh/deployment_key.pem
