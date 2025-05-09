@@ -28,3 +28,4 @@ jobs:
             # Restart the server with PM2
             pm2 restart index || (echo "Error occurred, restarting PM2"; pm2 restart index)
           EOF
+    

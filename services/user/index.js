@@ -15,7 +15,7 @@ const register = async (req, res) => {
       const isExistEmail = await User.findOne({
         where : {
           email: email
-        }
+        }    
       })  
 
       if(isExistEmail) {
