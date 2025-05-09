@@ -22,7 +22,7 @@ jobs:
         echo "${{ secrets.PEM_SECRET }}" | base64 --decode > ~/.ssh/deployment_key.pem
       
     - name: Set Permissions on Pem file
-      run:  chmod 600 ~/.ssh/deployment_key.pem
+      run:  chmod 400 ~/.ssh/deployment_key.pem
 
     - name: Add SSH host key to known_hosts
       run: ssh-keyscan -H "${{secrets.SERVER_IP}}" >> ~/.ssh/known_hosts
